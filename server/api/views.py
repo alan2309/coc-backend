@@ -6,6 +6,7 @@ from rest_framework.parsers import JSONParser
 from api.models import Reviews,MyUser,Trip
 from .serializers import ReviewSerializer,MyUserSerializer,TripSerializer
 import datetime
+from django.contrib.auth.models import User,auth
 
 # Create your views here.
 @csrf_exempt
@@ -172,3 +173,23 @@ def getTrips(request):
             "planned":TripSerializer(trips_planned,many=True).data,
             "completed":TripSerializer(trips_done,many=True).data
             },safe=False)
+    
+@csrf_exempt    
+def login(request):
+     if request.method == 'POST' :
+        data=JSONParser().parse(request)['data']
+        username = data['username']
+        password = data['password']
+        user = auth.authenticate(username = username,password = password)
+        if user is not None:
+            auth.login(request,user)
+            return JsonResponse('done',safe=False)
+            # myuser = MyUser.objects.get(user=user)
+            # user_data = MyUserSerializer(myuser).data
+            # return JsonResponse(user_data,safe=False)
+
+@csrf_exempt
+def regsiter(request):
+    if request.method=="POST":
+        data=JSONParser().parse(request)['data']
+                    

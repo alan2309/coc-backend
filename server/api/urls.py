@@ -2,6 +2,10 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    #Authentication
+    path('login/',views.login),
+
+
     path('post-review/',views.postReview),
     path('get-reviews/',views.getReviews),
     path('get-companions/',views.getCompanions),
