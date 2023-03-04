@@ -4,7 +4,7 @@ from django.http.response import JsonResponse
 import geopy.distance
 from rest_framework.parsers import JSONParser
 from api.models import Reviews,MyUser,Trip
-from .serializers import ReviewSerializer,MyUserSerializer
+from .serializers import ReviewSerializer,MyUserSerializer,TripSerializer
 import datetime
 
 # Create your views here.
@@ -42,9 +42,10 @@ def getCompanions(request):
         data=JSONParser().parse(request)['data']
         lat = data['latitude']
         long = data['longitude']
+        user = MyUser.objects.get(id = data['uid'])
         interests = data['interests']
         d = datetime.datetime.utcnow()
-        trips = Trip.objects.filter(end_date__gt=d)
+        trips = Trip.objects.filter(end_date__gt=d).exclude(user = user)
         sort_trip = []
         for trip in trips:
             dist = geopy.distance.geodesic((lat,long), (trip.location['latitude'],trip.location['longitude'])).km
@@ -53,6 +54,24 @@ def getCompanions(request):
             else:
                 print(dist)
         print(sort_trip)
+        print(user.pending_req)
+        for i in user.friends:
+            for user in sort_trip:
+                if user.email == i:
+                    sort_trip.remove(user)
+        for i in user.pending_req:
+            for user in sort_trip:
+                if user.email == i:
+                    sort_trip.remove(user)
+        for i in user.req_sent:
+            for user in sort_trip:
+                if user.email == i:
+                    sort_trip.remove(user)
+        for i in user.blocked:
+            for user in sort_trip:
+                if user.email == i:
+                    sort_trip.remove(user)                        
+        print(sort_trip)            
         sort_users = []
         for u in sort_trip:
             count = 0
@@ -67,4 +86,80 @@ def getCompanions(request):
                     temp = sort_users[j]  
                     sort_users[j] = sort_users[j+1]  
                     sort_users[j+1] = temp
-        return JsonResponse(sort_users,safe=False)    
+        return JsonResponse(sort_users,safe=False)  
+
+@csrf_exempt 
+def saveTrip(request):
+    if request.method == "POST":
+        data=JSONParser().parse(request)['data']
+        trip = Trip(user = MyUser.objects.get(id = data['uid']),
+                    name = data['name'],
+                    location = data['location'],
+                    start_date = data['start_date'],
+                    end_date = data['end_date'],
+                    itinerary = data['itinerary'],
+                    )
+        trip.save()
+        return JsonResponse(TripSerializer(trip).data,safe=False)     
+
+@csrf_exempt  
+def sendReq(request):
+    if request.method == "POST":
+        data=JSONParser().parse(request)['data']
+        user = MyUser.objects.get(id = data['uid'])
+        user.req_sent.append(data['email'])
+        user.save()
+        print(user)
+        fr = MyUser.objects.get(email = data['email'])
+        fr.pending_req.append(user.email)
+        fr.save()
+        print(fr)
+        return JsonResponse("done",safe=False)
+
+@csrf_exempt  
+def notifications(request):
+    data=JSONParser().parse(request)['data']
+    user = MyUser.objects.get(id= data['uid']) 
+    user_data = MyUserSerializer(user).data
+    return JsonResponse(user_data,safe=False)
+
+@csrf_exempt  
+def acceptReq(request):
+    if request.method == "POST":
+        data=JSONParser().parse(request)['data']
+        user = MyUser.objects.get(data['uid'])
+        user.pending_req.remove(data['email'])
+        user.friends.append(data['email'])
+        user.save()
+        user2 = MyUser.objects.get(email = data['email'])
+        user2.req_sent.remove(user.email)
+        user2.save()
+        pass
+
+@csrf_exempt  
+def rejectReq(request):
+    if request.method == "POST":
+        data=JSONParser().parse(request)['data']
+        user = MyUser.objects.get(data['uid'])
+        user.pending_req.remove(data['email'])
+        user.blocked.append(data['email'])
+        user.save()
+        user2 = MyUser.objects.get(email = data['email'])
+        user2.req_sent.remove(user.email)
+        user2.save()
+        pass
+
+@csrf_exempt
+def getTrips(request):
+    if request.method == "POST":
+        data=JSONParser().parse(request)['data']
+        trips = Trip.objects.filter(user = MyUser.objects.get(id = data['uid']))
+        d = datetime.datetime.utcnow()
+        trips_on = trips.filter(start_date__lte = d,end_date__gt=d)
+        trips_done = trips.filter(end_date__lte=d)
+        trips_planned = trips.filter(start_date__gt = d)
+        return JsonResponse({
+            "ongoing": TripSerializer(trips_on,many=True).data,
+            "planned":TripSerializer(trips_planned,many=True).data,
+            "completed":TripSerializer(trips_done,many=True).data
+            },safe=False)

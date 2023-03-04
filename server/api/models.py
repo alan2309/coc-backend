@@ -10,10 +10,13 @@ class MyUser(models.Model):
     age = models.IntegerField()
     gender = models.CharField(max_length=10)
     address = models.CharField(max_length=100)
-    friends = models.JSONField(null=True,blank=True)
+    friends = models.JSONField(default=list,null=True,blank=True)
     home = models.CharField(max_length=100)
     phone = models.IntegerField(null=True,blank=True)
     interests = models.JSONField(null=True,blank=True)
+    pending_req = models.JSONField(default=list,null=True,blank=True)
+    blocked = models.JSONField(default=list,null=True,blank=True)
+    req_sent = models.JSONField(default=list,null=True,blank=True)
 
     def __str__(self):
         return self.user.first_name
@@ -22,12 +25,13 @@ class Trip(models.Model):
     user = models.ForeignKey(MyUser,on_delete=models.CASCADE,null=True,blank=True)
     name = models.CharField(max_length=20)
     location = models.JSONField()
-    start_date = models.DateField()
-    end_date = models.DateField()     
+    start_date = models.DateField(null=True,blank=True)
+    end_date = models.DateField(null=True,blank=True)     
     companion = models.JSONField(null=True,blank=True)
     itinerary = models.JSONField(null=True,blank=True)
     feedback = models.IntegerField(default=0)
-    status = models.IntegerField() #0-complete 1-ongoing 2-future
+    pending_req = models.JSONField(null=True,blank=True)
+    status = models.IntegerField(default=0) #0-complete 1-ongoing 2-future
 
     def __str__(self):
         return self.name

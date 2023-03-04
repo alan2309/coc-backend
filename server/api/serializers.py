@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from api.models import Reviews,MyUser
+from api.models import Reviews,MyUser,Trip
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -10,4 +10,9 @@ class ReviewSerializer(serializers.ModelSerializer):
 class MyUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = MyUser
-        fields='__all__'        
+        fields='__all__'    
+
+class TripSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Trip
+        fields='__all__'             
