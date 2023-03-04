@@ -25,6 +25,7 @@ class Trip(models.Model):
     user = models.ForeignKey(MyUser,on_delete=models.CASCADE,null=True,blank=True)
     name = models.CharField(max_length=20)
     location = models.JSONField()
+    loc_name = models.CharField(max_length=100,null=True,blank=True)
     start_date = models.DateField(null=True,blank=True)
     end_date = models.DateField(null=True,blank=True)     
     companion = models.JSONField(null=True,blank=True)

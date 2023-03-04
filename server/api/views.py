@@ -30,9 +30,11 @@ def getReviews(request):
 def postReview(request):
     if request.method == "POST":
         data=JSONParser().parse(request)['data']
+        trip = Trip.objects.get(id = data['tid'])
         rev = Reviews(user=MyUser.objects.get(id=data['uid'])
-                    #   ,trip =Trip.objects.get(id=data['tid']) 
-                      ,name="hello",location=data['location'],itinerary = data['location'])
+                      ,trip =Trip.objects.get(id=data['tid']) 
+                      ,name=trip.name,location=data['location'],itinerary = trip.itinerary,
+                      loc_name = trip.loc_name,review = "good")
         rev.save()
         return JsonResponse("done",safe=False)
     
