@@ -136,14 +136,14 @@ def notifications(request):
 def acceptReq(request):
     if request.method == "POST":
         data=JSONParser().parse(request)['data']
-        user = MyUser.objects.get(data['uid'])
+        user = MyUser.objects.get(id=data['uid'])
         user.pending_req.remove(data['email'])
         user.friends.append(data['email'])
         user.save()
         user2 = MyUser.objects.get(email = data['email'])
         user2.req_sent.remove(user.email)
         user2.save()
-        pass
+        return JsonResponse({"data":"Success"},safe=False)
 
 @csrf_exempt  
 def rejectReq(request):
@@ -156,7 +156,7 @@ def rejectReq(request):
         user2 = MyUser.objects.get(email = data['email'])
         user2.req_sent.remove(user.email)
         user2.save()
-        pass
+        return JsonResponse({"data":"Success"},safe=False)
 
 @csrf_exempt
 def getTrips(request):
