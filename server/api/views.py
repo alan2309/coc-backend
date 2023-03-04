@@ -123,11 +123,14 @@ def sendReq(request):
 def notifications(request):
     data=JSONParser().parse(request)['data']
     user = MyUser.objects.get(id= data['uid'])
-    reqs = {} 
+    reqs_data=[]
     for i in user.pending_req:
-        reqs[i] = MyUser.objects.get(email = i).name
+        reqs = {} 
+        reqs['name'] = MyUser.objects.get(email = i).name
+        reqs["email"]=i
+        reqs_data.append(reqs)
     user_data = MyUserSerializer(user).data
-    return JsonResponse({"data":user_data,"reqs":reqs},safe=False)
+    return JsonResponse({"data":user_data,"reqs":reqs_data},safe=False)
 
 @csrf_exempt  
 def acceptReq(request):
