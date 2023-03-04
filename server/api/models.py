@@ -4,11 +4,15 @@ from django.contrib.auth.models import User
 # Create your models here.
 class MyUser(models.Model):
     user = models.OneToOneField(User,on_delete=models.CASCADE)
+    name = models.CharField(max_length=20,null=True,blank=True)
+    email = models.EmailField(null=True,blank=True)
+    profile_img = models.CharField(max_length=255,null=True,blank=True)
     age = models.IntegerField()
     gender = models.CharField(max_length=10)
     address = models.CharField(max_length=100)
     friends = models.JSONField(null=True,blank=True)
     home = models.CharField(max_length=100)
+    phone = models.IntegerField(null=True,blank=True)
     interests = models.JSONField(null=True,blank=True)
 
     def __str__(self):
