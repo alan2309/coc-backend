@@ -25,11 +25,15 @@ class Trip(models.Model):
     feedback = models.IntegerField(default=0)
     status = models.IntegerField() #0-complete 1-ongoing 2-future
 
+    def __str__(self):
+        return self.name
+
 class Reviews(models.Model):
     user = models.ForeignKey(MyUser,on_delete=models.SET_NULL,null=True,blank=True)
     trip = models.ForeignKey(Trip,on_delete=models.SET_NULL,null=True,blank=True)
     name = models.CharField(max_length=30)
     itinerary = models.JSONField()
+    location = models.JSONField()
     time = models.TimeField(auto_now=True)
     review = models.CharField(max_length=200)
     images = models.JSONField()

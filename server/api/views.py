@@ -3,7 +3,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http.response import JsonResponse 
 import geopy.distance
 from rest_framework.parsers import JSONParser
-from api.models import Reviews,MyUser
+from api.models import Reviews,MyUser,Trip
 from .serializers import ReviewSerializer
 
 # Create your views here.
@@ -26,6 +26,8 @@ def getReviews(request):
 def postReview(request):
     if request.method == "POST":
         data=JSONParser().parse(request)['data']
-        rev = Reviews(user=MyUser.objects.get(id=data['uid']),name="hello",location=data['location'],itinerary = data['location'])
+        rev = Reviews(user=MyUser.objects.get(id=data['uid'])
+                    #   ,trip =Trip.objects.get(id=data['tid']) 
+                      ,name="hello",location=data['location'],itinerary = data['location'])
         rev.save()
         return JsonResponse("done",safe=False)
