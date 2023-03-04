@@ -52,6 +52,35 @@ module.exports.getAllUsers = async (req, res, next) => {
     next(ex);
   }
 };
+module.exports.getAllFrndsUsers = async (req, res, next) => {
+  try {
+    const users = await User.find({ _id: req.params.id, }).select([
+      "email",
+      "username",
+      "avatarImage",
+      "friends",
+      "_id",
+    ]);
+    let frndsArr=[]
+    for(let x in users[0]["friends"]){
+        console.log(users[0]["friends"][x])
+        let frnd=await User.find({email:users[0]["friends"][x]}).select([
+            "email",
+            "username",
+            "avatarImage",
+            "friends",
+            "_id",
+        ])
+        if(frnd !==null || frnd !== undefined){
+            frndsArr.push(frnd[0])
+        }
+
+    }
+    return res.json(frndsArr);
+  } catch (ex) {
+    next(ex);
+  }
+};
 
 module.exports.setAvatar = async (req, res, next) => {
   try {
