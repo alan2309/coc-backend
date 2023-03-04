@@ -97,6 +97,7 @@ def saveTrip(request):
         trip = Trip(user = MyUser.objects.get(id = data['uid']),
                     name = data['name'],
                     location = data['location'],
+                    loc_name = data['loc_name'],
                     start_date = data['start_date'],
                     end_date = data['end_date'],
                     itinerary = data['itinerary'],
