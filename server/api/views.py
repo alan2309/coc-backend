@@ -7,6 +7,7 @@ from api.models import Reviews,MyUser,Trip
 from .serializers import ReviewSerializer,MyUserSerializer,TripSerializer
 import datetime
 from django.contrib.auth.models import User,auth
+from django.contrib.auth.hashers import make_password
 
 # Create your views here.
 @csrf_exempt
@@ -183,13 +184,27 @@ def login(request):
         user = auth.authenticate(username = username,password = password)
         if user is not None:
             auth.login(request,user)
-            return JsonResponse('done',safe=False)
-            # myuser = MyUser.objects.get(user=user)
-            # user_data = MyUserSerializer(myuser).data
-            # return JsonResponse(user_data,safe=False)
+            #return JsonResponse({"status":'done',"user":user},safe=False)
+            myuser = MyUser.objects.get(user=user)
+            user_data = MyUserSerializer(myuser).data
+            return JsonResponse(user_data,safe=False)
+        else:
+            return JsonResponse({"status":'error'},safe=False)
 
 @csrf_exempt
 def regsiter(request):
     if request.method=="POST":
         data=JSONParser().parse(request)['data']
+        print(data)
+        
+        user=User.objects.filter(email=data["email"])
+        if not user.exists():
+            user=User(email=data["email"],first_name=data["name"],password=make_password(data["password"]),username=data["username"])
+            myuser=MyUser(user=user,email=data["email"],age=data["age"],gender=data["gender"],home=data["home"],interests=data["interests"],phone=data["phone"],profile_img=data["profile_img"])
+            user.save()
+            myuser.save()
+        
+            
+
+        return JsonResponse({"data":"Success"},safe=False)
                     
