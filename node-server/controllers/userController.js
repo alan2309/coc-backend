@@ -52,29 +52,48 @@ module.exports.getAllUsers = async (req, res, next) => {
     next(ex);
   }
 };
+module.exports.addFriend = async (req, res, next) => {
+  try {
+    const { myemail, email } = req.body;
+    await User.findOne({ email: email }, (err, doc) => {
+      doc.friends.push(myemail);
+      doc.save((e) => {
+        console.log(e);
+      });
+    });
+    await User.findOne({ email: myemail }, (err, doc) => {
+      doc.friends.push(email);
+      doc.save((e) => {
+        console.log(e);
+      });
+    });
+    return res.json("Success");
+  } catch (ex) {
+    next(ex);
+  }
+};
 module.exports.getAllFrndsUsers = async (req, res, next) => {
   try {
-    const users = await User.find({ _id: req.params.id, }).select([
+    const users = await User.find({ _id: req.params.id }).select([
       "email",
       "username",
       "avatarImage",
       "friends",
       "_id",
     ]);
-    let frndsArr=[]
-    for(let x in users[0]["friends"]){
-        console.log(users[0]["friends"][x])
-        let frnd=await User.find({email:users[0]["friends"][x]}).select([
-            "email",
-            "username",
-            "avatarImage",
-            "friends",
-            "_id",
-        ])
-        if(frnd !==null || frnd !== undefined){
-            frndsArr.push(frnd[0])
-        }
-
+    let frndsArr = [];
+    for (let x in users[0]["friends"]) {
+      console.log(users[0]["friends"][x]);
+      let frnd = await User.find({ email: users[0]["friends"][x] }).select([
+        "email",
+        "username",
+        "avatarImage",
+        "friends",
+        "_id",
+      ]);
+      if (frnd !== null || frnd !== undefined) {
+        frndsArr.push(frnd[0]);
+      }
     }
     return res.json(frndsArr);
   } catch (ex) {
