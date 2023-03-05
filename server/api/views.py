@@ -144,6 +144,7 @@ def acceptReq(request):
         user.save()
         user2 = MyUser.objects.get(email = data['email'])
         user2.req_sent.remove(user.email)
+        user2.friends.append(user.email)
         user2.save()
         return JsonResponse({"data":"Success"},safe=False)
 
