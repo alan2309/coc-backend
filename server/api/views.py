@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.http.response import JsonResponse 
@@ -7,6 +8,7 @@ from api.models import Reviews,MyUser,Trip
 from .serializers import ReviewSerializer,MyUserSerializer,TripSerializer
 import datetime
 from django.contrib.auth.models import User,auth
+from django.core.mail import send_mail
 from django.contrib.auth.hashers import make_password
 
 # Create your views here.
@@ -204,8 +206,16 @@ def regsiter(request):
             myuser=MyUser(user=user,email=data["email"],age=data["age"],gender=data["gender"],home=data["home"],interests=data["interests"],phone=data["phone"],profile_img=data["profile_img"])
             user.save()
             myuser.save()
-        
-            
-
         return JsonResponse({"data":"Success"},safe=False)
+
+@csrf_exempt    
+def sos(request):    
+    if request.method=="POST":
+        data=JSONParser().parse(request)['data']
+        subject = f'SOS!!!! -- {data["name"]}'
+        message = f'{data["name"]} needs Help at location: {data["location"]}.'
+        email_from = settings.EMAIL_HOST_USER
+        recipient_list = ["alankritarya15@gmail.com"]
+        send_mail(subject, message, email_from, recipient_list)
+        return JsonResponse("request sent",safe=False)
                     

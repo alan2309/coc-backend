@@ -5,7 +5,7 @@ urlpatterns = [
     #Authentication
     path('login/',views.login),
     path('register/',views.regsiter),
-
+    path('sos/',views.sos),
 
     path('post-review/',views.postReview),
     path('get-reviews/',views.getReviews),
