@@ -140,14 +140,17 @@ def notifications(request):
 def acceptReq(request):
     if request.method == "POST":
         data=JSONParser().parse(request)['data']
-        user = MyUser.objects.get(id=data['uid'])
-        user.pending_req.remove(data['email'])
-        user.friends.append(data['email'])
-        user.save()
-        user2 = MyUser.objects.get(email = data['email'])
-        user2.req_sent.remove(user.email)
-        user2.friends.append(user.email)
-        user2.save()
+        try:
+            user = MyUser.objects.get(id=data['uid'])
+            user.pending_req.remove(data['email'])
+            user.friends.append(data['email'])
+            user.save()
+            user2 = MyUser.objects.get(email = data['email'])
+            user2.req_sent.remove(user.email)
+            user2.friends.append(user.email)
+            user2.save()
+        except Exception as e:
+            print(e)
         return JsonResponse({"data":"Success"},safe=False)
 
 @csrf_exempt  
@@ -203,7 +206,7 @@ def regsiter(request):
         user=User.objects.filter(email=data["email"])
         if not user.exists():
             user=User(email=data["email"],first_name=data["name"],password=make_password(data["password"]),username=data["username"])
-            myuser=MyUser(user=user,email=data["email"],age=data["age"],gender=data["gender"],home=data["home"],interests=data["interests"],phone=data["phone"],profile_img=data["profile_img"])
+            myuser=MyUser(user=user,email=data["email"],name=data["name"],age=data["age"],gender=data["gender"],home=data["home"],interests=data["interests"],phone=data["phone"],profile_img=data["profile_img"])
             user.save()
             myuser.save()
         return JsonResponse({"data":"Success"},safe=False)
